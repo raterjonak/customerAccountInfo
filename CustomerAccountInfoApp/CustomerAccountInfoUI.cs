@@ -69,7 +69,7 @@ namespace CustomerAccountInfoApp
 
                     if (rowAffected > 0)
                     {
-                        MessageBox.Show("Insertion successful.");
+                        MessageBox.Show("Your account number "+accountObj.accountNo+" has been created successful.");
 
                         ShowAllAccountInfo();
                         ClearAllTextBox();
@@ -173,28 +173,40 @@ namespace CustomerAccountInfoApp
             accountObj.accountNo = int.Parse(tranAccountNoTextBox.Text);
             double deposite = double.Parse(amountTextBox.Text);
 
-            Account acObj = getAccount(accountObj.accountNo);
-
-            double newBalance = deposite + acObj.balance;
-
-            SqlConnection connection = new SqlConnection(connectionString);
-            string query = "Update  account_tbl Set balance=" + newBalance + " Where accountNumber='" + accountObj.accountNo + "'";
-            SqlCommand command = new SqlCommand(query, connection);
-
-            connection.Open();
-
-            int rowAffected=command.ExecuteNonQuery();
-            connection.Close();
-
-            if (rowAffected>0)
+            if (deposite < 1)
             {
-                MessageBox.Show("Deposit succesful");
-                ShowAllAccountInfo();
+                MessageBox.Show("Deposit amount should be positive value.");
             }
 
             else
             {
-                MessageBox.Show("Deposite operation Fail");
+
+
+
+                Account acObj = getAccount(accountObj.accountNo);
+
+                double newBalance = deposite + acObj.balance;
+
+                SqlConnection connection = new SqlConnection(connectionString);
+                string query = "Update  account_tbl Set balance=" + newBalance + " Where accountNumber='" +
+                               accountObj.accountNo + "'";
+                SqlCommand command = new SqlCommand(query, connection);
+
+                connection.Open();
+
+                int rowAffected = command.ExecuteNonQuery();
+                connection.Close();
+
+                if (rowAffected > 0)
+                {
+                    MessageBox.Show("Deposit succesful");
+                    ShowAllAccountInfo();
+                }
+
+                else
+                {
+                    MessageBox.Show("Deposite operation Fail");
+                }
             }
         }
 
@@ -235,26 +247,47 @@ namespace CustomerAccountInfoApp
 
             Account acObj = getAccount(accountObj.accountNo);
 
-            double newBalance = acObj.balance-withdraw;
-
-            SqlConnection connection = new SqlConnection(connectionString);
-            string query = "Update  account_tbl Set balance=" + newBalance + " Where accountNumber='" + accountObj.accountNo + "'";
-            SqlCommand command = new SqlCommand(query, connection);
-
-            connection.Open();
-
-            int rowAffected = command.ExecuteNonQuery();
-            connection.Close();
-
-            if (rowAffected > 0)
+            if (withdraw > acObj.balance)
             {
-                MessageBox.Show("withdraw succesful");
-                ShowAllAccountInfo();
+                MessageBox.Show("You have not enough balance to withdraw.");
             }
 
             else
             {
-                MessageBox.Show("withdraw operation Fail");
+                if (withdraw < 0)
+                {
+                    MessageBox.Show("Withdrawal amount should be positive value.");
+                }
+
+                else
+                {
+
+
+
+
+                    double newBalance = acObj.balance - withdraw;
+
+                    SqlConnection connection = new SqlConnection(connectionString);
+                    string query = "Update  account_tbl Set balance=" + newBalance + " Where accountNumber='" +
+                                   accountObj.accountNo + "'";
+                    SqlCommand command = new SqlCommand(query, connection);
+
+                    connection.Open();
+
+                    int rowAffected = command.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowAffected > 0)
+                    {
+                        MessageBox.Show("withdraw succesful");
+                        ShowAllAccountInfo();
+                    }
+
+                    else
+                    {
+                        MessageBox.Show("withdraw operation Fail");
+                    }
+                }
             }
         }
     }
