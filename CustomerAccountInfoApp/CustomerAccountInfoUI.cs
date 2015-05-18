@@ -171,42 +171,52 @@ namespace CustomerAccountInfoApp
 
 
             accountObj.accountNo = int.Parse(tranAccountNoTextBox.Text);
-            double deposite = double.Parse(amountTextBox.Text);
 
-            if (deposite < 1)
-            {
-                MessageBox.Show("Deposit amount should be positive value.");
-            }
-
-            else
+            if (IsAccountExist(accountObj.accountNo))
             {
 
+                double deposite = double.Parse(amountTextBox.Text);
 
-
-                Account acObj = getAccount(accountObj.accountNo);
-
-                double newBalance = deposite + acObj.balance;
-
-                SqlConnection connection = new SqlConnection(connectionString);
-                string query = "Update  account_tbl Set balance=" + newBalance + " Where accountNumber='" +
-                               accountObj.accountNo + "'";
-                SqlCommand command = new SqlCommand(query, connection);
-
-                connection.Open();
-
-                int rowAffected = command.ExecuteNonQuery();
-                connection.Close();
-
-                if (rowAffected > 0)
+                if (deposite < 1)
                 {
-                    MessageBox.Show("Deposit succesful");
-                    ShowAllAccountInfo();
+                    MessageBox.Show("Deposit amount should be positive value.");
                 }
 
                 else
                 {
-                    MessageBox.Show("Deposite operation Fail");
+
+
+
+                    Account acObj = getAccount(accountObj.accountNo);
+
+                    double newBalance = deposite + acObj.balance;
+
+                    SqlConnection connection = new SqlConnection(connectionString);
+                    string query = "Update  account_tbl Set balance=" + newBalance + " Where accountNumber='" +
+                                   accountObj.accountNo + "'";
+                    SqlCommand command = new SqlCommand(query, connection);
+
+                    connection.Open();
+
+                    int rowAffected = command.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowAffected > 0)
+                    {
+                        MessageBox.Show("Deposit succesful");
+                        ShowAllAccountInfo();
+                    }
+
+                    else
+                    {
+                        MessageBox.Show("Deposite operation Fail");
+                    }
                 }
+            }
+
+            else
+            {
+                MessageBox.Show("Sorry! your account number does not exist.");
             }
         }
 
@@ -243,6 +253,11 @@ namespace CustomerAccountInfoApp
         private void withdrawButton_Click(object sender, EventArgs e)
         {
             accountObj.accountNo = int.Parse(tranAccountNoTextBox.Text);
+
+            if (IsAccountExist(accountObj.accountNo))
+            {
+                
+            
             double withdraw = double.Parse(amountTextBox.Text);
 
             Account acObj = getAccount(accountObj.accountNo);
@@ -288,7 +303,45 @@ namespace CustomerAccountInfoApp
                         MessageBox.Show("withdraw operation Fail");
                     }
                 }
+
+           
             }
+            }
+
+            else
+            {
+                MessageBox.Show("Your account Number does not exist!!");
+            }
+        }
+
+        private void searchButton_Click(object sender, EventArgs e)
+        {
+            accountObj.accountNo = int.Parse(accountSearchTextBox.Text);
+
+            SqlConnection connection = new SqlConnection(connectionString);
+            string query = "SELECT * FROM account_tbl Where accountNumber Like'"+accountObj.accountNo+"%'";
+            SqlCommand command = new SqlCommand(query, connection);
+
+            connection.Open();
+            SqlDataReader reader = command.ExecuteReader();
+            List<Account> accountList = new List<Account>();
+            while (reader.Read())
+            {
+                Account account = new Account();
+                account.accountNo = int.Parse(reader["accountNumber"].ToString());
+                account.customerName = reader["customerName"].ToString();
+                account.openingDate = reader["openingDate"].ToString();
+                account.balance = double.Parse(reader["balance"].ToString());
+
+                accountList.Add(account);
+            }
+
+            reader.Close();
+            connection.Close();
+
+            customerAccountInfoListView.Items.Clear();
+
+            LoadAccountListView(accountList);
         }
     }
 }
